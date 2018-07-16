@@ -72,6 +72,12 @@ function promise(){var a,b,c=new Promise(function(d,e){a=d;b=e;});c.resolve=a;c.
 	}
 
 	function setUpAudio(el) {
+		let existingAudioButton = el.find('button.audio-btn');
+
+		if (existingAudioButton.length > 0) {
+			return;
+		}
+
 		let characters = el.find('span.vocabulary').text();
 
 		let audioButtonElem = getAudioButtonElement().appendTo(el);
