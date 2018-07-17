@@ -9,7 +9,6 @@
 // ==/UserScript==
 
 (function($) {$.each(['show'], function(i, ev) { var el = $.fn[ev]; $.fn[ev] = function() { this.trigger(ev); return el.apply(this, arguments); }; }); })(jQuery);
-function promise(){var a,b,c=new Promise(function(d,e){a=d;b=e;});c.resolve=a;c.reject=b;return c;}
 
 (function() {
 	'use strict';
@@ -38,6 +37,8 @@ function promise(){var a,b,c=new Promise(function(d,e){a=d;b=e;});c.resolve=a;c.
 			}
 		}
 	};
+
+	function promise(){var a,b,c=new Promise(function(d,e){a=d;b=e;});c.resolve=a;c.reject=b;return c;}
 
 	function initialize() {
 		$('#supplement-kan-related-vocabulary').on('show', function(e) {
