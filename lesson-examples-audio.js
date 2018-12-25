@@ -3,12 +3,14 @@
 // @namespace     https://www.wanikani.com
 // @description   Allows you to play audio for example vocab during kanji lessons.
 // @author        seanblue
-// @version       1.0.0
+// @version       1.0.1
 // @include       *://www.wanikani.com/lesson/session*
 // @grant         none
 // ==/UserScript==
 
-(function($) {$.each(['show'], function(i, ev) { var el = $.fn[ev]; $.fn[ev] = function() { this.trigger(ev); return el.apply(this, arguments); }; }); })(jQuery);
+const eventPrefix = 'seanblue.example_audio.';
+
+(function($) {$.each(['show'], function(i, ev) { var el = $.fn[ev]; $.fn[ev] = function() { this.trigger(eventPrefix + ev); return el.apply(this, arguments); }; }); })(jQuery);
 
 (function() {
 	'use strict';
@@ -41,7 +43,7 @@
 	function promise(){var a,b,c=new Promise(function(d,e){a=d;b=e;});c.resolve=a;c.reject=b;return c;}
 
 	function initialize() {
-		$('#supplement-kan-related-vocabulary').on('show', function(e) {
+		$('#supplement-kan-related-vocabulary').on(eventPrefix + 'show', function(e) {
 			loadSubjects();
 
 			subjectsLoadedPromise.then(function() {
