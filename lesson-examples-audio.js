@@ -3,7 +3,7 @@
 // @namespace     https://www.wanikani.com
 // @description   Allows you to play audio for example vocab during kanji lessons.
 // @author        seanblue
-// @version       1.0.1
+// @version       1.0.2
 // @include       *://www.wanikani.com/lesson/session*
 // @grant         none
 // ==/UserScript==
@@ -30,7 +30,7 @@ const eventPrefix = 'seanblue.example_audio.';
 
 	var subjectLoadingInitiated = false;
 	var subjectsLoadedPromise = promise();
-	var subjectToIdMap;
+	var subjectToAudioMap;
 
 	var config = {
 		wk_items: {
@@ -66,12 +66,27 @@ const eventPrefix = 'seanblue.example_audio.';
 	}
 
 	function processSubjects(items) {
-		subjectToIdMap = items.reduce(function(map, obj) {
-			map[obj.data.characters] = obj.id;
+		subjectToAudioMap = items.reduce(function(map, obj) {
+			map[obj.data.characters] = getAudioUrl(obj);
 			return map;
 		}, {});
 
 		subjectsLoadedPromise.resolve();
+	}
+
+	function getAudioUrl(item) {
+		var mp3Audios = item.data.pronunciation_audios.filter(a => a.content_type === 'audio/mpeg');
+		var preferredAudios = mp3Audios.filter(a => a.metadata.voice_actor_id === WaniKani.default_voice_actor_id);
+
+		if (preferredAudios.length > 0) {
+			return preferredAudios[0].url;
+		}
+
+		if (mp3Audios.length > 0) {
+			return mp3Audios[0].url;
+		}
+
+		return '';
 	}
 
 	function setUpAudio(el) {
@@ -82,9 +97,14 @@ const eventPrefix = 'seanblue.example_audio.';
 		}
 
 		let characters = el.find('span.vocabulary').text();
+		let audioUrl = subjectToAudioMap[characters];
+
+		if (audioUrl === '') {
+			return;
+		}
 
 		let audioButtonElem = getAudioButtonElement().appendTo(el);
-		let audioElem = getAudioElement(characters);
+		let audioElem = getAudioElement(audioUrl);
 
 		setUpAudioEvents(audioButtonElem, audioElem);
 	}
@@ -93,20 +113,15 @@ const eventPrefix = 'seanblue.example_audio.';
 		return $('<button type="button" title="Play pronunciation audio" class="audio-btn audio-idle"></button>');
 	}
 
-	function getAudioElement(characters) {
+	function getAudioElement(audioUrl) {
 		let audioElem = $('<audio></audio>');
 
-		let audioUrl = getAudioUrl(characters);
 		$('<source></source>', {
 			src: audioUrl,
 			type: 'audio/mpeg'
 		}).appendTo(audioElem);
 
 		return audioElem;
-	}
-
-	function getAudioUrl(characters) {
-		return `https://cdn.wanikani.com/subjects/audio/${subjectToIdMap[characters]}-${encodeURIComponent(characters)}.mp3`;
 	}
 
 	function setUpAudioEvents(audioButtonElem, audioElem) {
